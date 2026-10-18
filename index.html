@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1B4D3E">
+<title>Bòlèt 15</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#1B4D3E;--gold:#F5B700;--cream:#FFF8E7;--ink:#14231D;--muted:#5A6B62;--line:#E8DFC4;color-scheme:light}
+*{box-sizing:border-box;margin:0}
+body{font-family:Outfit,system-ui,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+header{background:var(--green);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 14px;display:flex;align-items:center;gap:12px}
+.mark{width:40px;height:40px;border-radius:50%;border:3px solid var(--gold);display:grid;place-items:center;font-weight:700;font-size:16px;color:#fff}
+header h1{font-size:22px;font-weight:700;letter-spacing:.2px}
+main{max-width:480px;margin:0 auto;padding:20px}
+#banner{display:none;background:var(--gold);color:var(--green);border-radius:12px;padding:14px 16px;font-weight:500;font-size:17px;text-align:center;margin-bottom:16px}
+#banner.show{display:block}
+.clock{position:relative;width:240px;height:240px;margin:8px auto 24px}
+.clock svg{width:100%;height:100%;transform:rotate(-90deg)}
+.clock .track{fill:none;stroke:var(--line);stroke-width:10}
+.clock .bar{fill:none;stroke:var(--gold);stroke-width:10;stroke-linecap:round;stroke-dasharray:628.3;transition:stroke-dashoffset .25s linear}
+.clock .txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.clock .time{font-size:58px;font-weight:700;color:var(--green);font-variant-numeric:tabular-nums;line-height:1}
+.clock .lbl{font-size:15px;color:var(--muted);margin-top:8px}
+.last{background:var(--green);color:#fff;border-radius:16px;padding:20px;text-align:center;margin-bottom:24px}
+.last .lbl{font-size:15px;opacity:.85}
+.last .num{font-size:84px;font-weight:700;color:var(--gold);line-height:1.1;font-variant-numeric:tabular-nums}
+.last .sub{font-size:14px;opacity:.85}
+h2{font-size:18px;font-weight:500;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;font-size:14px;color:var(--muted);padding:8px 6px;border-bottom:2px solid var(--line)}
+td{padding:12px 6px;border-bottom:1px solid var(--line);font-size:16px}
+td.n{font-weight:700;color:var(--green);font-size:20px;text-align:right}
+th.n{text-align:right}
+.note{margin-top:16px;font-size:13px;color:var(--muted);text-align:center}
+body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+header .hb{margin-left:auto;font-size:15px}
+header .hb b{color:var(--gold);font-weight:700;font-size:18px}
+#banner{white-space:pre-line}
+[hidden]{display:none!important}
+label{display:block;font-size:15px;color:var(--muted);margin:16px 0 8px}
+input{width:100%;font:inherit;font-size:20px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+input:focus{outline:3px solid var(--gold);border-color:var(--green)}
+#num{font-size:72px;font-weight:700;text-align:center;color:var(--green);letter-spacing:6px;padding:8px}
+.chips{display:flex;gap:8px;margin-bottom:10px}
+.chips button{flex:1;font:inherit;font-size:17px;font-weight:500;padding:10px 0;border-radius:12px;border:2px solid var(--green);background:#fff;color:var(--green)}
+.chips button:active{background:var(--green);color:#fff}
+.gain{margin:14px 0 4px;font-size:16px;color:var(--green);font-weight:500;min-height:24px}
+.err{color:#B3261E;font-size:15px;min-height:22px}
+.okmsg{color:var(--green);font-size:16px;font-weight:500;min-height:22px}
+.okmsg:not(:empty){background:#E3F3E8;border-radius:12px;padding:12px 14px}
+#go,#authGo{width:100%;font:inherit;font-size:20px;font-weight:700;padding:16px;border:0;border-radius:14px;background:var(--gold);color:var(--green);margin-top:8px}
+#go:disabled,#authGo:disabled{background:var(--line);color:var(--muted)}
+#betList{list-style:none;padding:0}
+#betList li{padding:12px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+#betList .bn{font-size:28px;font-weight:700;color:var(--green)}
+#betList .d{font-size:14px;color:var(--muted)}
+#betList .s{font-weight:500;font-size:15px;text-align:right}
+.won{color:var(--green)}.lost{color:#B3261E}.wait{color:var(--muted)}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;font:inherit;font-size:16px;padding:16px 0;border:0;background:none;color:var(--muted)}
+nav button.on{color:var(--green);font-weight:700;box-shadow:inset 0 3px 0 var(--gold)}
+.balls{display:flex;justify-content:center;gap:14px;margin:14px 0 10px}
+.ball{text-align:center}
+.ball b{display:grid;place-items:center;width:76px;height:76px;border-radius:50%;background:var(--gold);color:var(--green);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.ball span{display:block;font-size:14px;margin-top:6px;opacity:.9}
+.prizes{display:flex;gap:8px;margin-bottom:6px}
+.prize{flex:1;background:#fff;border:2px solid var(--line);border-radius:12px;padding:10px 4px;text-align:center}
+.prize small{display:block;color:var(--muted);font-size:13px}
+.prize b{display:block;color:var(--green);font-size:26px;font-variant-numeric:tabular-nums}
+#num.bad{border-color:#B3261E;background:#FDECEA}
+#pbanner{display:none;border-radius:12px;padding:14px 16px;font-weight:500;font-size:17px;text-align:center;margin-bottom:16px}
+#pbanner.show{display:block}
+#pbanner.win{background:#E3F3E8;color:var(--green)}
+#pbanner.lose{background:#fff;border:2px solid var(--line);color:var(--ink)}
+.outbtn{margin-left:12px;background:none;border:1px solid rgba(255,255,255,.55);color:#fff;border-radius:8px;font:inherit;font-size:13px;padding:6px 10px}
+#auth{position:fixed;inset:0;z-index:20;background:var(--cream);overflow:auto;display:flex;align-items:center;justify-content:center;padding:20px}
+.authbox{width:100%;max-width:400px}
+.authbox .mark{width:72px;height:72px;font-size:28px;margin:0 auto 12px;color:var(--green)}
+.authbox h2{text-align:center;font-size:24px;color:var(--green);margin-bottom:8px}
+.link{width:100%;background:none;border:0;color:var(--green);font:inherit;font-size:15px;margin-top:16px;text-decoration:underline;padding:8px}
+@media (prefers-reduced-motion:reduce){.clock .bar{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="mark" aria-hidden="true">15</div>
+  <h1>Bòlèt 15</h1>
+  <div class="hb"><b id="hbal">0</b> goud</div>
+  <button id="out" class="outbtn" type="button">Soti</button>
+</header>
+<main>
+  <div id="banner" role="status" aria-live="polite"></div>
+  <div id="pbanner" role="status" aria-live="polite"></div>
+
+  <div class="view" id="v-rezilta">
+
+  <div class="clock" role="timer" aria-label="Tan ki rete anvan pwochen tiraj la">
+    <svg viewBox="0 0 240 240" aria-hidden="true">
+      <circle class="track" cx="120" cy="120" r="100"/>
+      <circle class="bar" id="bar" cx="120" cy="120" r="100"/>
+    </svg>
+    <div class="txt">
+      <div class="time" id="time">15:00</div>
+      <div class="lbl">anvan pwochen tiraj</div>
+    </div>
+  </div>
+
+  <section class="last" aria-label="Dènye nimewo">
+    <div class="lbl">Dènye nimewo yo</div>
+    <div class="balls" id="lastNum"></div>
+    <div class="sub" id="lastSub"></div>
+  </section>
+
+  <h2>Dènye rezilta yo</h2>
+  <table>
+    <thead><tr><th>Tiraj</th><th>Lè</th><th class="n">Nimewo yo</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <p class="note">Mòd tès : rezilta yo ak lajan an se egzanp pou kounye a.</p>
+  </div>
+
+  <div class="view" id="v-jwe" hidden>
+    <h2>Si ou parye 10 goud</h2>
+    <div class="prizes" id="prizes"></div>
+    <label for="num">Ekri nimewo ou vle jwe a (00 a 99)</label>
+    <input id="num" inputmode="numeric" maxlength="2" placeholder="00" autocomplete="off">
+    <label for="amt">Konbyen goud ou vle parye ?</label>
+    <div class="chips">
+      <button type="button" data-a="10">10</button>
+      <button type="button" data-a="25">25</button>
+      <button type="button" data-a="50">50</button>
+      <button type="button" data-a="100">100</button>
+    </div>
+    <input id="amt" inputmode="numeric" placeholder="Lòt montan" autocomplete="off">
+    <p class="gain" id="gain"></p>
+    <p class="err" id="err" role="alert"></p>
+    <p class="okmsg" id="ok" role="status"></p>
+    <button id="go" type="button">Parye</button>
+    <p class="note" id="lockNote"></p>
+  </div>
+
+  <div class="view" id="v-pari" hidden>
+    <h2>Pari m yo</h2>
+    <p class="note" id="noBets">Ou poko fè okenn pari.</p>
+    <ul id="betList"></ul>
+  </div>
+</main>
+
+<nav>
+  <button type="button" data-v="rezilta" class="on">Rezilta</button>
+  <button type="button" data-v="jwe">Jwe</button>
+  <button type="button" data-v="pari">Pari m</button>
+</nav>
+
+<div id="auth">
+  <div class="authbox">
+    <div class="mark" aria-hidden="true">15</div>
+    <h2>Byenvini sou Bòlèt 15</h2>
+    <label for="user">Non itilizatè</label>
+    <input id="user" autocomplete="username" autocapitalize="none" maxlength="20">
+    <label for="pass">Modpas</label>
+    <input id="pass" type="password" autocomplete="current-password">
+    <p class="err" id="authErr" role="alert"></p>
+    <button id="authGo" type="button">Konekte</button>
+    <button id="authSwitch" class="link" type="button">Ou poko gen kont ? Kreye youn</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, orderBy, limit, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBdiKDvpCgzL9KPXqy1L_8X2nXRHTltmdk",
+  authDomain: "bolet15.firebaseapp.com",
+  projectId: "bolet15",
+  storageBucket: "bolet15.firebasestorage.app",
+  messagingSenderId: "500739937128",
+  appId: "1:500739937128:web:118c763ef3ef474d2d3cdd"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ROUND_MS = 15 * 60 * 1000;
+const MULTS = [40, 15, 5];
+const MIN_BET = 10, MAX_BET = 500, LOCK_S = 60, PRIZE_BASE = 10;
+const $ = id => document.getElementById(id);
+const roundId = t => Math.floor(t / ROUND_MS);
+
+function drawInfo(id) {
+  const d = new Date((id + 1) * ROUND_MS);
+  const no = d.getHours() * 4 + Math.floor(d.getMinutes() / 15) + 1;
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return { no, time: hh + ':' + mm };
+}
+
+let userData = null, draws = [], bets = [], unsubs = [];
+let signingUp = false, busy = false, firstDraws = true, seenRound = 0;
+let currentRound = roundId(Date.now());
+const betStatus = new Map();
+const timers = {};
+
+function flash(id, text, cls, ms) {
+  const el = $(id);
+  el.textContent = text;
+  el.className = (cls ? cls + ' ' : '') + 'show';
+  clearTimeout(timers[id]);
+  timers[id] = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function updateBalance() {
+  $('hbal').textContent = userData ? userData.balance : 0;
+}
+
+function renderResults() {
+  $('rows').innerHTML = draws.length
+    ? draws.map(d => {
+        const i = drawInfo(d.round);
+        return '<tr><td>#' + i.no + '</td><td>' + i.time + '</td><td class="n">' + d.numbers.join(' ') + '</td></tr>';
+      }).join('')
+    : '<tr><td colspan="3">Poko gen tiraj.</td></tr>';
+  const last = draws[0];
+  $('lastNum').innerHTML = last
+    ? last.numbers.map((n, i) => '<div class="ball"><b>' + n + '</b><span>×' + MULTS[i] + '</span></div>').join('')
+    : '';
+  updateLastSub(Date.now());
+}
+
+function updateLastSub(now) {
+  const last = draws[0];
+  if (!last) { $('lastSub').textContent = 'Poko gen tiraj.'; return; }
+  const i = drawInfo(last.round);
+  let t = 'Tiraj #' + i.no + ' a ' + i.time;
+  if (last.round < currentRound - 1 && (now % ROUND_MS) > 30000) t += ' (ap tann nouvo tiraj la...)';
+  $('lastSub').textContent = t;
+}
+
+function renderBets() {
+  $('noBets').hidden = bets.length > 0;
+  $('betList').innerHTML = bets.slice(0, 30).map(b => {
+    const i = drawInfo(b.round);
+    const st = b.status === 'won' ? '<span class="won">Genyen ' + b.gain + ' goud</span>'
+      : b.status === 'lost' ? '<span class="lost">Pèdi</span>'
+      : '<span class="wait">Ap tann tiraj la</span>';
+    return '<li><div><div class="bn">' + b.num + '</div><div class="d">Tiraj #' + i.no + ' a ' + i.time + '</div></div>'
+      + '<div class="s">' + b.amount + ' goud<br>' + st + '</div></li>';
+  }).join('');
+}
+
+function updateLock(left) {
+  const locked = left <= LOCK_S * 1000;
+  $('go').disabled = locked || busy;
+  $('go').textContent = locked ? 'Pari yo fèmen, yo ouvè nan ' + Math.ceil(left / 1000) + ' s' : 'Parye';
+  $('lockNote').textContent = locked
+    ? 'Pari yo fèmen. Tann pwochen tiraj la pou w jwe ankò.'
+    : 'Pari yo fèmen ' + LOCK_S + ' segonn anvan tiraj la.';
+}
+
+function tick() {
+  const now = Date.now();
+  currentRound = roundId(now);
+  const left = ROUND_MS - (now % ROUND_MS);
+  const s = Math.ceil(left / 1000);
+  $('time').textContent = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  $('bar').style.strokeDashoffset = 628.3 * (1 - left / ROUND_MS);
+  updateLock(left);
+  updateLastSub(now);
+}
+
+function personalMessage(b) {
+  if (b.status === 'won') return ['win', 'Felisitasyon ! Nimewo ' + b.num + ' ou a soti, ou genyen ' + b.gain + ' goud !'];
+  const d = draws.find(x => x.round === b.round);
+  const nums = d ? 'Nimewo ' + d.numbers.join(', ') + ' soti, men se pa pa w sa a.' : 'Nimewo ou a pa soti fwa sa a.';
+  return ['lose', nums + ' Pwochen tiraj la nan 15 minit !'];
+}
+
+const ms = b => (b.createdAt && b.createdAt.toMillis) ? b.createdAt.toMillis() : Date.now();
+
+onSnapshot(query(collection(db, 'draws'), orderBy('round', 'desc'), limit(10)), s => {
+  const list = s.docs.map(d => d.data());
+  const newest = list[0];
+  if (!firstDraws && newest && newest.round > seenRound) {
+    const i = drawInfo(newest.round);
+    flash('banner', '🎉 Nimewo ki soti nan tiraj #' + i.no + ' la yo se ' + newest.numbers.join(', ') + ' !', '', 12000);
+  }
+  firstDraws = false;
+  if (newest) seenRound = Math.max(seenRound, newest.round);
+  draws = list;
+  renderResults();
+}, e => console.error('draws', e));
+
+function showAuth(show) { $('auth').hidden = !show; }
+
+onAuthStateChanged(auth, user => {
+  unsubs.forEach(f => f());
+  unsubs = [];
+  betStatus.clear();
+  if (!user) {
+    userData = null; bets = [];
+    updateBalance(); renderBets(); showAuth(true);
+    return;
+  }
+  showAuth(false);
+  unsubs.push(onSnapshot(doc(db, 'users', user.uid), s => {
+    if (s.exists()) userData = s.data();
+    else if (!signingUp) {
+      const name = (user.email || 'jwe').split('@')[0];
+      setDoc(doc(db, 'users', user.uid), { username: name, balance: 1000, betSeq: 0, createdAt: serverTimestamp() }).catch(e => console.error(e));
+    }
+    updateBalance();
+  }, e => console.error('user', e)));
+  unsubs.push(onSnapshot(query(collection(db, 'bets'), where('uid', '==', user.uid)), s => {
+    bets = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ms(b) - ms(a));
+    s.docChanges().forEach(ch => {
+      const b = ch.doc.data();
+      const prev = betStatus.get(ch.doc.id);
+      if (prev === 'open' && b.status !== 'open') {
+        const m = personalMessage(b);
+        flash('pbanner', m[1], m[0], 12000);
+      }
+      betStatus.set(ch.doc.id, b.status);
+    });
+    renderBets();
+  }, e => console.error('bets', e)));
+});
+
+let mode = 'login';
+function setMode(m) {
+  mode = m;
+  $('authGo').textContent = m === 'login' ? 'Konekte' : 'Kreye kont mwen';
+  $('authSwitch').textContent = m === 'login' ? 'Ou poko gen kont ? Kreye youn' : 'Ou gen kont deja ? Konekte';
+  $('authErr').textContent = '';
+}
+function authMsg(e) {
+  const c = e.code || '';
+  if (c === 'auth/email-already-in-use') return 'Non itilizatè sa a pran deja.';
+  if (['auth/invalid-credential', 'auth/user-not-found', 'auth/wrong-password', 'auth/invalid-login-credentials'].includes(c)) return 'Non oswa modpas la pa bon.';
+  if (c === 'auth/weak-password') return 'Modpas la dwe gen omwen 6 karaktè.';
+  if (c === 'auth/network-request-failed') return 'Pa gen entènèt. Eseye ankò.';
+  if (c === 'auth/too-many-requests') return 'Twòp esè. Tann yon ti moman.';
+  if (c === 'auth/operation-not-allowed') return 'Koneksyon ak e-mail pa aktive nan Firebase.';
+  return 'Erè : ' + (c || e.message);
+}
+$('authSwitch').addEventListener('click', () => setMode(mode === 'login' ? 'signup' : 'login'));
+$('authGo').addEventListener('click', async () => {
+  const u = $('user').value.trim().toLowerCase();
+  const p = $('pass').value;
+  $('authErr').textContent = '';
+  if (!/^[a-z0-9_]{3,20}$/.test(u)) { $('authErr').textContent = 'Non itilizatè a dwe gen 3 a 20 karaktè (lèt, chif oswa _).'; return; }
+  if (p.length < 6) { $('authErr').textContent = 'Modpas la dwe gen omwen 6 karaktè.'; return; }
+  $('authGo').disabled = true;
+  try {
+    if (mode === 'signup') {
+      signingUp = true;
+      const cred = await createUserWithEmailAndPassword(auth, u + '@bolet15.app', p);
+      await setDoc(doc(db, 'users', cred.user.uid), { username: u, balance: 1000, betSeq: 0, createdAt: serverTimestamp() });
+      signingUp = false;
+    } else {
+      await signInWithEmailAndPassword(auth, u + '@bolet15.app', p);
+    }
+    $('pass').value = '';
+  } catch (e) {
+    signingUp = false;
+    $('authErr').textContent = authMsg(e);
+  }
+  $('authGo').disabled = false;
+});
+$('out').addEventListener('click', () => signOut(auth));
+
+const numEl = $('num'), amtEl = $('amt');
+numEl.addEventListener('input', () => { numEl.classList.remove('bad'); numEl.value = numEl.value.replace(/\D/g, '').slice(0, 2); });
+numEl.addEventListener('blur', () => { if (numEl.value.length === 1) numEl.value = '0' + numEl.value; });
+function previewGain() {
+  const a = parseInt(amtEl.value, 10);
+  $('gain').textContent = a > 0 ? 'Si nimewo a soti : boul 1 = ' + (a * MULTS[0]) + ', boul 2 = ' + (a * MULTS[1]) + ', boul 3 = ' + (a * MULTS[2]) + ' goud.' : '';
+}
+amtEl.addEventListener('input', () => { amtEl.value = amtEl.value.replace(/\D/g, '').slice(0, 5); previewGain(); });
+document.querySelectorAll('.chips button').forEach(c => c.addEventListener('click', () => { amtEl.value = c.dataset.a; previewGain(); }));
+
+$('go').addEventListener('click', async () => {
+  clearTimeout(timers.ok);
+  $('err').textContent = '';
+  $('ok').textContent = '';
+  if (busy || ROUND_MS - (Date.now() % ROUND_MS) <= LOCK_S * 1000) return;
+  if (!auth.currentUser || !userData) { $('err').textContent = 'Tann yon ti moman, kont ou ap chaje.'; return; }
+  let num = numEl.value;
+  if (num.length === 1) num = '0' + num;
+  if (num.length !== 2) { $('err').textContent = 'Ou poko ekri nimewo ou a. Tape l nan gwo bwat la (00 a 99).'; numEl.classList.add('bad'); numEl.focus(); return; }
+  const amount = parseInt(amtEl.value, 10);
+  if (!(amount >= MIN_BET && amount <= MAX_BET)) { $('err').textContent = 'Montan an dwe ant ' + MIN_BET + ' ak ' + MAX_BET + ' goud.'; return; }
+  if (amount > userData.balance) { $('err').textContent = 'Ou pa gen ase lajan.'; return; }
+  busy = true;
+  $('go').disabled = true;
+  const uid = auth.currentUser.uid;
+  const seq = userData.betSeq || 0;
+  const round = currentRound;
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'users', uid), { balance: userData.balance - amount, betSeq: seq + 1 });
+    batch.set(doc(db, 'bets', uid + '_' + seq), { uid, round, num, amount, status: 'open', gain: 0, createdAt: serverTimestamp() });
+    await batch.commit();
+    $('ok').textContent = '✅ Paryaj aksepte ! Nimewo ' + num + ', ' + amount + ' goud, tiraj #' + drawInfo(round).no + '.';
+    timers.ok = setTimeout(() => { $('ok').textContent = ''; }, 4000);
+    numEl.value = '';
+    amtEl.value = '';
+    previewGain();
+  } catch (e) {
+    console.error(e);
+    $('err').textContent = e.code === 'permission-denied'
+      ? 'Paryaj la pa pase. Verifye lè telefòn ou (mete l otomatik) epi eseye ankò.'
+      : 'Pa gen koneksyon. Eseye ankò.';
+  }
+  busy = false;
+});
+
+document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === btn));
+  ['rezilta', 'jwe', 'pari'].forEach(v => { $('v-' + v).hidden = v !== btn.dataset.v; });
+}));
+
+$('prizes').innerHTML = MULTS.map((m, i) =>
+  '<div class="prize"><small>Boul ' + (i + 1) + '</small><b>' + (PRIZE_BASE * m) + '</b><small>goud (×' + m + ')</small></div>').join('');
+
+setMode('login');
+renderResults();
+tick();
+setInterval(tick, 250);
+</script>
+</body>
+</html>
