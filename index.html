@@ -50,13 +50,13 @@ input:focus{outline:3px solid var(--gold);border-color:var(--green)}
 .err{color:#B3261E;font-size:15px;min-height:22px}
 .okmsg{color:var(--green);font-size:16px;font-weight:500;min-height:22px}
 .okmsg:not(:empty){background:#E3F3E8;border-radius:12px;padding:12px 14px}
-#go,#authGo{width:100%;font:inherit;font-size:20px;font-weight:700;padding:16px;border:0;border-radius:14px;background:var(--gold);color:var(--green);margin-top:8px}
-#go:disabled,#authGo:disabled{background:var(--line);color:var(--muted)}
-#betList{list-style:none;padding:0}
-#betList li{padding:12px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
-#betList .bn{font-size:28px;font-weight:700;color:var(--green)}
-#betList .d{font-size:14px;color:var(--muted)}
-#betList .s{font-weight:500;font-size:15px;text-align:right}
+#go,#authGo,#depGo{width:100%;font:inherit;font-size:20px;font-weight:700;padding:16px;border:0;border-radius:14px;background:var(--gold);color:var(--green);margin-top:8px}
+#go:disabled,#authGo:disabled,#depGo:disabled{background:var(--line);color:var(--muted)}
+#betList,#depList{list-style:none;padding:0}
+#betList li,#depList li{padding:12px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+#betList .bn,#depList .bn{font-size:28px;font-weight:700;color:var(--green)}
+#betList .d,#depList .d{font-size:14px;color:var(--muted)}
+#betList .s,#depList .s{font-weight:500;font-size:15px;text-align:right}
 .won{color:var(--green)}.lost{color:#B3261E}.wait{color:var(--muted)}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;font:inherit;font-size:16px;padding:16px 0;border:0;background:none;color:var(--muted)}
@@ -80,6 +80,13 @@ nav button.on{color:var(--green);font-weight:700;box-shadow:inset 0 3px 0 var(--
 .authbox .mark{width:72px;height:72px;font-size:28px;margin:0 auto 12px;color:var(--green)}
 .authbox h2{text-align:center;font-size:24px;color:var(--green);margin-bottom:8px}
 .link{width:100%;background:none;border:0;color:var(--green);font:inherit;font-size:15px;margin-top:16px;text-decoration:underline;padding:8px}
+.chips2{display:flex;gap:8px;margin-bottom:10px}
+.chips2 button{flex:1;font:inherit;font-size:17px;font-weight:500;padding:10px 0;border-radius:12px;border:2px solid var(--green);background:#fff;color:var(--green)}
+.chips2 button.on{background:var(--green);color:#fff}
+.paybox{background:var(--green);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:6px}
+.paybox small{display:block;opacity:.85;font-size:14px}
+.paybox b{display:block;font-size:28px;color:var(--gold);letter-spacing:1px;font-variant-numeric:tabular-nums}
+.step{font-size:15px;color:var(--ink);margin:14px 0 8px}
 @media (prefers-reduced-motion:reduce){.clock .bar{transition:none}}
 </style>
 </head>
@@ -146,12 +153,42 @@ nav button.on{color:var(--green);font-weight:700;box-shadow:inset 0 3px 0 var(--
     <p class="note" id="noBets">Ou poko fè okenn pari.</p>
     <ul id="betList"></ul>
   </div>
+  <div class="view" id="v-recharje" hidden>
+    <h2>Rechaje kont ou</h2>
+    <p class="step">1. Chwazi MonCash oswa Natcash, epi voye lajan an sou nimewo a.</p>
+    <div class="chips2" id="methods">
+      <button type="button" data-m="moncash" class="on">MonCash</button>
+      <button type="button" data-m="natcash">Natcash</button>
+    </div>
+    <div class="paybox"><small>Voye lajan an sou</small><b id="payNum"></b></div>
+    <p class="step">2. Apre sa, ranpli fòm lan pou nou konfime depo a.</p>
+    <label for="depAmt">Montan ou voye a (50 a 500 goud)</label>
+    <div class="chips2" id="dchips">
+      <button type="button" data-a="50">50</button>
+      <button type="button" data-a="100">100</button>
+      <button type="button" data-a="250">250</button>
+      <button type="button" data-a="500">500</button>
+    </div>
+    <input id="depAmt" inputmode="numeric" placeholder="Lòt montan" autocomplete="off">
+    <label for="depPhone">Nimewo telefòn ou te voye lajan an</label>
+    <input id="depPhone" inputmode="tel" placeholder="37000000" autocomplete="off">
+    <label for="depCode">Kòd tranzaksyon an (resi MonCash/Natcash)</label>
+    <input id="depCode" autocapitalize="characters" placeholder="Egzanp : 1234567890" autocomplete="off">
+    <p class="err" id="depErr" role="alert"></p>
+    <p class="okmsg" id="depOk" role="status"></p>
+    <button id="depGo" type="button">Voye demann lan</button>
+    <p class="note">Lajan an antre sou kont ou apre nou verifye depo a (kèk minit).</p>
+    <h2 style="margin-top:26px">Depo m yo</h2>
+    <p class="note" id="noDeps">Ou poko fè okenn depo.</p>
+    <ul id="depList"></ul>
+  </div>
 </main>
 
 <nav>
   <button type="button" data-v="rezilta" class="on">Rezilta</button>
   <button type="button" data-v="jwe">Jwe</button>
   <button type="button" data-v="pari">Pari m</button>
+  <button type="button" data-v="recharje">Recharje</button>
 </nav>
 
 <div id="auth">
@@ -203,6 +240,8 @@ let userData = null, draws = [], bets = [], unsubs = [];
 let signingUp = false, busy = false, firstDraws = true, seenRound = 0;
 let currentRound = roundId(Date.now());
 const betStatus = new Map();
+const depStatus = new Map();
+let myDeposits = [];
 const timers = {};
 
 function flash(id, text, cls, ms) {
@@ -300,6 +339,7 @@ onAuthStateChanged(auth, user => {
   unsubs.forEach(f => f());
   unsubs = [];
   betStatus.clear();
+  depStatus.clear();
   if (!user) {
     userData = null; bets = [];
     updateBalance(); renderBets(); showAuth(true);
@@ -327,6 +367,17 @@ onAuthStateChanged(auth, user => {
     });
     renderBets();
   }, e => console.error('bets', e)));
+  unsubs.push(onSnapshot(query(collection(db, 'deposits'), where('uid', '==', user.uid)), s => {
+    myDeposits = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => ms(b) - ms(a));
+    s.docChanges().forEach(ch => {
+      const d = ch.doc.data();
+      const prev = depStatus.get(ch.doc.id);
+      if (prev === 'pending' && d.status === 'approved') flash('pbanner', '✅ Depo ' + d.amount + ' goud la konfime. Lajan an antre sou kont ou !', 'win', 12000);
+      if (prev === 'pending' && d.status === 'rejected') flash('pbanner', 'Depo ' + d.amount + ' goud la pa aksepte. Kontakte administratè a.', 'lose', 12000);
+      depStatus.set(ch.doc.id, d.status);
+    });
+    renderDeposits();
+  }, e => console.error('deposits', e)));
 });
 
 let mode = 'login';
@@ -420,13 +471,67 @@ $('go').addEventListener('click', async () => {
 
 document.querySelectorAll('nav button').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === btn));
-  ['rezilta', 'jwe', 'pari'].forEach(v => { $('v-' + v).hidden = v !== btn.dataset.v; });
+  ['rezilta', 'jwe', 'pari', 'recharje'].forEach(v => { $('v-' + v).hidden = v !== btn.dataset.v; });
 }));
 
 $('prizes').innerHTML = MULTS.map((m, i) =>
   '<div class="prize"><small>Boul ' + (i + 1) + '</small><b>' + (PRIZE_BASE * m) + '</b><small>goud (×' + m + ')</small></div>').join('');
 
+
+// ---- Recharje (depots) ----
+// METS TES NUMEROS ICI (ce que les joueurs voient pour envoyer l'argent)
+const PAY_NUMBERS = { moncash: '', natcash: '' };
+const DEP_MIN = 50, DEP_MAX = 500;
+let depMethod = 'moncash';
+
+function renderPay() {
+  $('payNum').textContent = PAY_NUMBERS[depMethod] || '(nimewo a poko mete)';
+  document.querySelectorAll('#methods button').forEach(b => b.classList.toggle('on', b.dataset.m === depMethod));
+}
+function renderDeposits() {
+  $('noDeps').hidden = myDeposits.length > 0;
+  $('depList').innerHTML = myDeposits.slice(0, 20).map(d => {
+    const st = d.status === 'approved' ? '<span class="won">Konfime</span>'
+      : d.status === 'rejected' ? '<span class="lost">Pa aksepte</span>'
+      : '<span class="wait">Ap tann konfimasyon</span>';
+    return '<li><div><div class="bn">' + d.amount + ' goud</div><div class="d">' + (d.method === 'natcash' ? 'Natcash' : 'MonCash') + ', kòd ' + d.id + '</div></div>'
+      + '<div class="s">' + st + '</div></li>';
+  }).join('');
+}
+document.querySelectorAll('#methods button').forEach(b => b.addEventListener('click', () => { depMethod = b.dataset.m; renderPay(); }));
+document.querySelectorAll('#dchips button').forEach(b => b.addEventListener('click', () => { $('depAmt').value = b.dataset.a; }));
+$('depAmt').addEventListener('input', () => { $('depAmt').value = $('depAmt').value.replace(/\D/g, '').slice(0, 5); });
+$('depPhone').addEventListener('input', () => { $('depPhone').value = $('depPhone').value.replace(/\D/g, '').slice(0, 15); });
+
+let depTimer;
+$('depGo').addEventListener('click', async () => {
+  clearTimeout(depTimer);
+  $('depErr').textContent = '';
+  $('depOk').textContent = '';
+  if (!auth.currentUser) return;
+  const amount = parseInt($('depAmt').value, 10);
+  const phone = $('depPhone').value.replace(/\D/g, '');
+  const code = $('depCode').value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (!(amount >= DEP_MIN && amount <= DEP_MAX)) { $('depErr').textContent = 'Montan an dwe ant ' + DEP_MIN + ' ak ' + DEP_MAX + ' goud.'; return; }
+  if (phone.length < 8 || phone.length > 15) { $('depErr').textContent = 'Ekri nimewo telefòn ou te itilize pou voye lajan an.'; return; }
+  if (code.length < 5 || code.length > 30) { $('depErr').textContent = 'Ekri kòd tranzaksyon an (5 a 30 karaktè, lèt ak chif).'; return; }
+  $('depGo').disabled = true;
+  try {
+    await setDoc(doc(db, 'deposits', code), { uid: auth.currentUser.uid, amount, phone, method: depMethod, status: 'pending', createdAt: serverTimestamp() });
+    $('depOk').textContent = '✅ Demann lan voye ! Lajan an ap antre sou kont ou apre konfimasyon.';
+    depTimer = setTimeout(() => { $('depOk').textContent = ''; }, 6000);
+    $('depAmt').value = ''; $('depCode').value = '';
+  } catch (e) {
+    console.error(e);
+    $('depErr').textContent = e.code === 'permission-denied'
+      ? 'Kòd sa a deja itilize, oswa enfòmasyon yo pa bon.'
+      : 'Pa gen koneksyon. Eseye ankò.';
+  }
+  $('depGo').disabled = false;
+});
+
 setMode('login');
+renderPay();
 renderResults();
 tick();
 setInterval(tick, 250);

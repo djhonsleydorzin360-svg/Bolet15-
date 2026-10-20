@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ht">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1B4D3E">
+<title>Bòlèt 15 Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#1B4D3E;--gold:#F5B700;--cream:#FFF8E7;--ink:#14231D;--muted:#5A6B62;--line:#E8DFC4;color-scheme:light}
+*{box-sizing:border-box;margin:0}
+body{font-family:Outfit,system-ui,sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+[hidden]{display:none!important}
+header{background:var(--green);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 20px 14px;display:flex;align-items:center;gap:12px}
+header h1{font-size:20px;font-weight:700;flex:1}
+.outbtn{background:none;border:1px solid rgba(255,255,255,.55);color:#fff;border-radius:8px;font:inherit;font-size:13px;padding:6px 10px}
+main{max-width:520px;margin:0 auto;padding:18px}
+h2{font-size:18px;font-weight:500;margin:22px 0 10px}
+label{display:block;font-size:15px;color:var(--muted);margin:16px 0 8px}
+input{width:100%;font:inherit;font-size:20px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.btn{width:100%;font:inherit;font-size:19px;font-weight:700;padding:14px;border:0;border-radius:14px;background:var(--gold);color:var(--green);margin-top:12px}
+.err{color:#B3261E;font-size:15px;min-height:22px;margin-top:8px}
+.note{font-size:14px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--green);color:#fff;border-radius:14px;padding:14px}
+.stat small{display:block;font-size:13px;opacity:.85}
+.stat b{display:block;font-size:24px;color:var(--gold);font-variant-numeric:tabular-nums}
+.card{background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.card .who{font-weight:700;font-size:18px;color:var(--green)}
+.card .amt{font-weight:700;font-size:22px}
+.card .meta{font-size:14px;color:var(--muted);margin-top:6px;line-height:1.5}
+.card .meta b{color:var(--ink)}
+.row{display:flex;gap:8px;margin-top:12px}
+.row button{flex:1;font:inherit;font-size:16px;font-weight:700;padding:12px;border-radius:12px;border:0}
+.ok{background:var(--green);color:#fff}
+.no{background:#fff;border:2px solid #B3261E;color:#B3261E}
+.adj{background:#fff;border:2px solid var(--green);color:var(--green);font:inherit;font-size:14px;font-weight:500;padding:8px 12px;border-radius:10px}
+.u{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.u b{font-size:17px}
+.u span{color:var(--muted);font-size:14px;display:block}
+.uid{word-break:break-all;background:#fff;border:2px solid var(--line);border-radius:12px;padding:12px;font-family:monospace;font-size:15px;margin:10px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bòlèt 15, Admin</h1>
+  <button id="out" class="outbtn" type="button" hidden>Soti</button>
+</header>
+<main>
+  <section id="login">
+    <h2>Konekte</h2>
+    <label for="user">Non itilizatè</label>
+    <input id="user" autocomplete="username" autocapitalize="none">
+    <label for="pass">Modpas</label>
+    <input id="pass" type="password" autocomplete="current-password">
+    <p class="err" id="loginErr" role="alert"></p>
+    <button id="loginGo" class="btn" type="button">Konekte</button>
+  </section>
+
+  <section id="deny" hidden>
+    <h2>Kont sa a pa administratè</h2>
+    <p class="note">Pou ba kont sa dwa administratè, kreye yon dokiman nan Firestore : koleksyon <b>admins</b>, ID dokiman an = UID sa a :</p>
+    <div class="uid" id="myUid"></div>
+    <p class="note">Mete yon chan ki rele <b>ok</b> (boolean, true). Apre sa, rechaje paj la.</p>
+  </section>
+
+  <section id="panel" hidden>
+    <div class="stats">
+      <div class="stat"><small>Lajan jwè yo genyen</small><b id="sBal">0</b></div>
+      <div class="stat"><small>Depo ap tann</small><b id="sDep">0</b></div>
+      <div class="stat"><small>Pari ouvè (mize)</small><b id="sStake">0</b></div>
+      <div class="stat"><small>Pi gwo peman posib</small><b id="sRisk">0</b></div>
+    </div>
+    <p class="note" style="margin-top:8px">Pi gwo peman posib = tout pari ouvè ki ta jwenn boul 1 (×40). Se yon limit maksimòm.</p>
+
+    <h2>Depo ap tann konfimasyon</h2>
+    <p class="note" id="noDep">Pa gen depo ap tann.</p>
+    <div id="depList"></div>
+
+    <h2>Jwè yo</h2>
+    <div id="userList"></div>
+  </section>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, onSnapshot, writeBatch, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBdiKDvpCgzL9KPXqy1L_8X2nXRHTltmdk",
+  authDomain: "bolet15.firebaseapp.com",
+  projectId: "bolet15",
+  storageBucket: "bolet15.firebasestorage.app",
+  messagingSenderId: "500739937128",
+  appId: "1:500739937128:web:118c763ef3ef474d2d3cdd"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+let users = new Map(), pendings = [], openBets = [], unsubs = [];
+
+function show(which) {
+  ['login', 'deny', 'panel'].forEach(k => { $(k).hidden = k !== which; });
+  $('out').hidden = which === 'login';
+}
+
+function render() {
+  let totalBal = 0;
+  users.forEach(u => { totalBal += u.balance || 0; });
+  const stake = openBets.reduce((a, b) => a + (b.amount || 0), 0);
+  $('sBal').textContent = totalBal;
+  $('sDep').textContent = pendings.length;
+  $('sStake').textContent = stake;
+  $('sRisk').textContent = stake * 40;
+
+  $('noDep').hidden = pendings.length > 0;
+  $('depList').innerHTML = pendings.map(d => {
+    const name = users.has(d.uid) ? users.get(d.uid).username : '(enkoni)';
+    const when = d.createdAt && d.createdAt.toMillis ? new Date(d.createdAt.toMillis()).toLocaleString('fr-FR') : '';
+    return '<div class="card"><div class="top"><span class="who">' + esc(name) + '</span><span class="amt">' + d.amount + ' goud</span></div>'
+      + '<div class="meta"><b>' + (d.method === 'natcash' ? 'Natcash' : 'MonCash') + '</b><br>Kòd : <b>' + esc(d.id) + '</b><br>Nimewo ki voye : <b>' + esc(d.phone) + '</b><br>' + esc(when) + '</div>'
+      + '<div class="row"><button class="ok" data-act="ok" data-id="' + esc(d.id) + '">Konfime</button><button class="no" data-act="no" data-id="' + esc(d.id) + '">Rejte</button></div></div>';
+  }).join('');
+
+  const list = [...users.entries()].sort((a, b) => (b[1].balance || 0) - (a[1].balance || 0));
+  $('userList').innerHTML = list.map(([uid, u]) =>
+    '<div class="u"><div><b>' + esc(u.username) + '</b><span>' + (u.balance || 0) + ' goud</span></div><button class="adj" data-act="adj" data-id="' + esc(uid) + '">Ajiste</button></div>').join('');
+}
+
+async function decide(id, approve) {
+  const d = pendings.find(x => x.id === id);
+  if (!d) return;
+  const m = d.method === 'natcash' ? 'Natcash' : 'MonCash';
+  const q = approve
+    ? 'Ou verifye nan aplikasyon ' + m + ' ke ' + d.amount + ' goud antre (kòd ' + d.id + ', nimewo ' + d.phone + ') ?'
+    : 'Rejte depo ' + d.amount + ' goud sa a ?';
+  if (!confirm(q)) return;
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'deposits', d.id), { status: approve ? 'approved' : 'rejected', decidedAt: serverTimestamp() });
+  if (approve) batch.update(doc(db, 'users', d.uid), { balance: increment(d.amount) });
+  try { await batch.commit(); } catch (e) { alert('Erè : ' + (e.code || e.message)); }
+}
+
+async function adjust(uid) {
+  const u = users.get(uid);
+  if (!u) return;
+  const v = prompt('Konbyen goud pou ajoute pou ' + u.username + ' ? (mete - pou retire, egzanp -50)');
+  if (v === null) return;
+  const n = parseInt(v, 10);
+  if (!n) return;
+  if (!confirm((n > 0 ? 'Ajoute ' : 'Retire ') + Math.abs(n) + ' goud pou ' + u.username + ' ?')) return;
+  const batch = writeBatch(db);
+  batch.update(doc(db, 'users', uid), { balance: increment(n) });
+  try { await batch.commit(); } catch (e) { alert('Erè : ' + (e.code || e.message)); }
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  if (b.dataset.act === 'ok') decide(b.dataset.id, true);
+  if (b.dataset.act === 'no') decide(b.dataset.id, false);
+  if (b.dataset.act === 'adj') adjust(b.dataset.id);
+});
+
+onAuthStateChanged(auth, async user => {
+  unsubs.forEach(f => f());
+  unsubs = [];
+  users = new Map(); pendings = []; openBets = [];
+  if (!user) { show('login'); return; }
+  let ok = false;
+  try { ok = (await getDoc(doc(db, 'admins', user.uid))).exists(); } catch (e) { console.error(e); }
+  if (!ok) { $('myUid').textContent = user.uid; show('deny'); return; }
+  show('panel');
+  unsubs.push(onSnapshot(collection(db, 'users'), s => {
+    users = new Map(s.docs.map(d => [d.id, d.data()]));
+    render();
+  }, e => console.error('users', e)));
+  unsubs.push(onSnapshot(query(collection(db, 'deposits'), where('status', '==', 'pending')), s => {
+    pendings = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    render();
+  }, e => console.error('deposits', e)));
+  unsubs.push(onSnapshot(query(collection(db, 'bets'), where('status', '==', 'open')), s => {
+    openBets = s.docs.map(d => d.data());
+    render();
+  }, e => console.error('bets', e)));
+});
+
+$('loginGo').addEventListener('click', async () => {
+  const u = $('user').value.trim().toLowerCase();
+  const p = $('pass').value;
+  $('loginErr').textContent = '';
+  if (!u || !p) { $('loginErr').textContent = 'Ekri non itilizatè ak modpas.'; return; }
+  $('loginGo').disabled = true;
+  try { await signInWithEmailAndPassword(auth, u + '@bolet15.app', p); $('pass').value = ''; }
+  catch (e) { $('loginErr').textContent = 'Non oswa modpas la pa bon.'; }
+  $('loginGo').disabled = false;
+});
+$('out').addEventListener('click', () => signOut(auth));
+</script>
+</body>
+</html>
